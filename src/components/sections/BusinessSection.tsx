@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence, PanInfo } from 'framer-motion';
+import { motion, AnimatePresence, PanInfo, useMotionValue, useTransform } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
 interface Card {
@@ -25,12 +25,22 @@ export default function BusinessSection({ title, subtitle, cards }: BusinessSect
   const [isDragging, setIsDragging] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
+  const [constraints, setConstraints] = useState({ left: 0, right: 0 });
+  const dragX = useMotionValue(0);
 
-  const maxX = 0;
-  // 총 width에서 슬라이더 width를 뺀 값이 minX
-  const totalWidth = cards.length * (CARD_WIDTH + CARD_GAP) - CARD_GAP;
-  const sliderWidth = VISIBLE_CARDS * (CARD_WIDTH + CARD_GAP) + 200; // 오른쪽 여백 추가
-  const minX = -(totalWidth - sliderWidth);
+  useEffect(() => {
+    // 클라이언트에서만 실행
+    const updateConstraints = () => {
+      const totalWidth = cards.length * (CARD_WIDTH + CARD_GAP) - CARD_GAP;
+      const sliderWidth = window.innerWidth - 700;
+      const minX = Math.min(0, -(totalWidth - sliderWidth + 100));
+      setConstraints({ left: minX, right: 0 });
+    };
+    
+    updateConstraints();
+    window.addEventListener('resize', updateConstraints);
+    return () => window.removeEventListener('resize', updateConstraints);
+  }, [cards.length]);
 
   const handleDragStart = () => {
     setIsDragging(true);
@@ -41,10 +51,10 @@ export default function BusinessSection({ title, subtitle, cards }: BusinessSect
     const newX = x + info.offset.x;
     
     // 경계 체크
-    if (newX > maxX) {
-      setX(maxX);
-    } else if (newX < minX) {
-      setX(minX);
+    if (newX > constraints.right) {
+      setX(constraints.right);
+    } else if (newX < constraints.left) {
+      setX(constraints.left);
     } else {
       setX(newX);
     }
@@ -54,7 +64,7 @@ export default function BusinessSection({ title, subtitle, cards }: BusinessSect
     if (!isDragging) return;
     
     const newX = x + info.offset.x;
-    if (newX > maxX || newX < minX) {
+    if (newX > constraints.right || newX < constraints.left) {
       setIsDragging(false);
     }
   };
@@ -74,128 +84,202 @@ export default function BusinessSection({ title, subtitle, cards }: BusinessSect
   return (
     <div className="h-full relative">
       <div className="h-full flex items-center">
-        {/* Left Content - Fixed Position */}
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[600px] pl-80 pr-12 z-10">
+        {/* Slider Container - Full Width, Behind Left Content */}
+        <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[480px]">
+          {/* Masking Container */}
+          <div className="absolute left-[700px] right-0 h-full overflow-hidden">
+            <div 
+              className="relative h-full" 
+              ref={containerRef}
+              onMouseMove={handleMouseMove}
+              onMouseEnter={() => setIsHovering(true)}
+              onMouseLeave={() => setIsHovering(false)}
+            >
+              <AnimatePresence>
+                {isHovering && (
+                  <motion.div
+                    className="absolute pointer-events-none z-50"
+                    style={{
+                      width: '100px',
+                      height: '100px',
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(128, 128, 128, 0.8)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      color: 'rgba(255, 255, 255, 1)',
+                      transform: 'translate(-50%, -50%)',
+                      left: mousePosition.x,
+                      top: mousePosition.y
+                    }}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{
+                      opacity: 1,
+                      scale: isDragging ? 0.9 : 1,
+                      rotate: isDragging ? [0, -10, 10, 0] : 0
+                    }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {isDragging ? 'dragging' : 'drag'}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <motion.div
+                className="flex cursor-none active:cursor-none gap-6 absolute"
+                drag="x"
+                dragConstraints={{
+                  left: constraints.left,
+                  right: constraints.right
+                }}
+                dragElastic={0.05}
+                onDragStart={handleDragStart}
+                onDrag={handleDrag}
+                onDragEnd={handleDragEnd}
+                style={{ x: dragX, left: -700 }}
+                whileDrag={{ scale: 0.98 }}
+                transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              >
+                {cards.map((card, index) => (
+                  <motion.div
+                    key={`${card.title}-${index}`}
+                    className={`w-80 h-[480px] rounded-2xl flex-shrink-0 relative overflow-hidden ${!card.image ? card.bgColor : ''}`}
+                    initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                    animate={{ 
+                      opacity: 1, 
+                      y: 0,
+                      scale: 1
+                    }}
+                    transition={{
+                      delay: index * 0.15,
+                      duration: 0.8,
+                      ease: [0.25, 0.46, 0.45, 0.94]
+                    }}
+                    whileHover={{ 
+                      scale: 1.03,
+                      transition: { duration: 0.3 }
+                    }}
+                    style={card.image ? {
+                      backgroundImage: `url(${card.image})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center'
+                    } : {}}
+                  >
+                    {/* Overlay for better text readability */}
+                    {card.image && (
+                      <motion.div 
+                        className="absolute inset-0 bg-black/40"
+                        whileHover={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    )}
+                    
+                    {/* Card Content */}
+                    <motion.div 
+                      className="w-full h-full p-8 flex flex-col items-center justify-center text-white text-center relative overflow-hidden"
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {/* Background Pattern */}
+                      <motion.div 
+                        className="absolute inset-0 opacity-10"
+                        initial={{ scale: 1.5, rotate: 45 }}
+                        whileHover={{ scale: 2, rotate: 90 }}
+                        transition={{ duration: 0.8 }}
+                      >
+                        <div className="w-full h-full bg-gradient-to-br from-white/20 to-transparent"></div>
+                      </motion.div>
+                      
+                      {/* Content */}
+                      <div className="relative z-10">
+                        <motion.h3 
+                          className="text-3xl font-bold mb-6"
+                          whileHover={{ scale: 1.1 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          {card.title}
+                        </motion.h3>
+                        <motion.div 
+                          className="w-20 h-1 bg-white/50 mx-auto rounded-full"
+                          whileHover={{ 
+                            width: 120,
+                            backgroundColor: 'rgba(255,255,255,0.8)'
+                          }}
+                          transition={{ duration: 0.3 }}
+                        />
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
+          </div>
+        </div>
+
+        {/* Left Content - Fixed Position Above Slider */}
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[700px] pl-40 pr-12 z-10">
+          {/* Background gradient matching section background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-100 to-transparent"></div>
+          <div className="relative z-10">
           <motion.h1 
-            initial={{ x: -50, opacity: 0 }}
+            initial={{ x: -80, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
+            transition={{ 
+              delay: 0.2, 
+              duration: 1,
+              ease: [0.25, 0.46, 0.45, 0.94]
+            }}
             className="text-5xl font-bold mb-8 text-gray-800"
           >
             {title}
           </motion.h1>
           <motion.p 
-            initial={{ x: -50, opacity: 0 }}
+            initial={{ x: -60, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
+            transition={{ 
+              delay: 0.4, 
+              duration: 1,
+              ease: [0.25, 0.46, 0.45, 0.94]
+            }}
             className="text-lg text-gray-600 whitespace-pre-line max-w-lg mb-8"
           >
             {subtitle}
           </motion.p>
           <motion.button 
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              delay: 0.6, 
+              duration: 0.8,
+              ease: [0.25, 0.46, 0.45, 0.94]
+            }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => router.push('/business')}
-            className="group relative px-8 py-4 border-2 border-main-500 rounded-full text-main-600 font-semibold overflow-hidden transition-all duration-300 hover:text-white"
+            className="group relative px-8 py-4 border-2 border-main-500 rounded-full text-main-600 font-semibold overflow-hidden transition-all duration-500 hover:text-white"
           >
-            <span className="absolute inset-0 bg-main-500 transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span>
+            <motion.span 
+              className="absolute inset-0 bg-main-500"
+              initial={{ scaleX: 0 }}
+              whileHover={{ scaleX: 1 }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              style={{ originX: 0 }}
+            />
             <span className="relative flex items-center gap-2">
               주요 사업 바로가기
-              <svg className="w-5 h-5 transform transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <motion.svg 
+                className="w-5 h-5"
+                animate={{ x: [0, 3, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
+              </motion.svg>
             </span>
           </motion.button>
-        </div>
-        
-        {/* Slider Container - Full Width */}
-        <div className="w-full ml-[600px] relative z-20">
-          <div 
-            className="relative overflow-visible" 
-            ref={containerRef}
-            onMouseMove={handleMouseMove}
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
-          >
-            {isHovering && (
-              <motion.div
-                className="absolute pointer-events-none z-50"
-                style={{
-                  width: '100px',
-                  height: '100px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(128, 128, 128, 0.8)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '12px',
-                  color: 'rgba(255, 255, 255, 1)',
-                  transform: 'translate(-50%, -50%)',
-                  left: mousePosition.x,
-                  top: mousePosition.y
-                }}
-                animate={{
-                  scale: isDragging ? 0.9 : 1
-                }}
-                transition={{ duration: 0.2 }}
-              >
-                drag
-              </motion.div>
-            )}
-            <motion.div
-              className="flex cursor-none active:cursor-none gap-6"
-              drag="x"
-              dragConstraints={{
-                left: minX,
-                right: maxX
-              }}
-              dragElastic={0.1}
-              onDragStart={handleDragStart}
-              onDrag={handleDrag}
-              onDragEnd={handleDragEnd}
-              style={{ x }}
-              whileDrag={{ scale: 0.98 }}
-            >
-              {cards.map((card, index) => (
-                <motion.div
-                  key={`${card.title}-${index}`}
-                  className={`w-80 h-[480px] rounded-2xl flex-shrink-0 relative overflow-hidden ${!card.image ? card.bgColor : ''}`}
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ 
-                    opacity: 1, 
-                    y: 0
-                  }}
-                  transition={{
-                    delay: index * 0.1,
-                    duration: 0.5
-                  }}
-                  style={card.image ? {
-                    backgroundImage: `url(${card.image})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center'
-                  } : {}}
-                >
-                  {/* Overlay for better text readability */}
-                  {card.image && (
-                    <div className="absolute inset-0 bg-black/40"></div>
-                  )}
-                  
-                  {/* Card Content */}
-                  <div className="w-full h-full p-8 flex flex-col items-center justify-center text-white text-center relative overflow-hidden">
-                    {/* Background Pattern */}
-                    <div className="absolute inset-0 opacity-10">
-                      <div className="w-full h-full bg-gradient-to-br from-white/20 to-transparent"></div>
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="relative z-10">
-                      <h3 className="text-3xl font-bold mb-6">{card.title}</h3>
-                      <div className="w-20 h-1 bg-white/50 mx-auto rounded-full"></div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
           </div>
         </div>
       </div>

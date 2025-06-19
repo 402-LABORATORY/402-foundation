@@ -76,9 +76,11 @@ export default function Home() {
   const [showFooter, setShowFooter] = useState(false);
   const [footerHeight, setFooterHeight] = useState(120); // 기본값
   const footerRef = useRef<HTMLDivElement>(null);
+  const lastScrollTime = useRef<number>(0);
 
-  // 간단한 애니메이션 설정
-  const ANIMATION_DURATION = 600;
+  // 더 여유로운 애니메이션 설정
+  const ANIMATION_DURATION = 1000; // 600ms에서 1000ms로 증가
+  const SCROLL_COOLDOWN = 1200; // 스크롤 쿨다운 추가
 
   // Footer 높이 측정
   useEffect(() => {
@@ -100,23 +102,44 @@ export default function Home() {
     };
   }, [showFooter]); // showFooter가 변경될 때도 재측정
   
-  // 애니메이션 variants
-  const slideVariants = {
+  // 배경 전환을 위한 애니메이션 variants
+  const backgroundVariants = {
+    enter: {
+      opacity: 0,
+    },
+    center: {
+      opacity: 1,
+    },
+    exit: {
+      opacity: 0,
+    },
+  };
+
+  // 콘텐츠 애니메이션 variants
+  const contentVariants = {
     enter: (direction: number) => ({
-      y: direction > 0 ? '100%' : '-100%',
+      y: direction > 0 ? '30%' : '-30%',
+      opacity: 0,
+      scale: 0.95,
     }),
     center: {
       y: 0,
+      opacity: 1,
+      scale: 1,
     },
     exit: (direction: number) => ({
-      y: direction > 0 ? '-100%' : '100%',
+      y: direction > 0 ? '-30%' : '30%',
+      opacity: 0,
+      scale: 0.95,
     }),
   };
 
-  // 통합된 페이지 전환 함수  
+  // 통합된 페이지 전환 함수 - 스크롤 쿨다운 추가
   const paginate = (newDirection: number) => {
-    if (isScrolling) return;
+    const now = Date.now();
+    if (isScrolling || (now - lastScrollTime.current) < SCROLL_COOLDOWN) return;
     
+    lastScrollTime.current = now;
     const lastSectionIndex = sections.length - 1;
     
     setIsScrolling(true);
@@ -151,14 +174,18 @@ export default function Home() {
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
+      // 스크롤 감도 조정 - 작은 움직임은 무시
+      if (Math.abs(e.deltaY) < 30) return;
       const direction = e.deltaY > 0 ? 1 : -1;
       paginate(direction);
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
+        e.preventDefault();
         paginate(1);
       } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
         paginate(-1);
       }
     };
@@ -185,23 +212,42 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen relative">
+    <div className="h-screen relative overflow-x-hidden bg-gray-100">
       <Header />
       
+      {/* 배경 레이어 - 항상 존재하며 crossfade */}
+      <div className="absolute inset-0 z-0">
+        <AnimatePresence initial={false}>
+          <motion.div
+            key={`bg-${currentSection}`}
+            variants={backgroundVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ 
+              duration: ANIMATION_DURATION / 1000 * 1.5, // 배경은 더 천천히
+              ease: "easeInOut"
+            }}
+            className={`absolute inset-0 bg-gradient-to-br ${sections[currentSection]?.bgGradient || 'from-gray-100 to-gray-200'}`}
+          />
+        </AnimatePresence>
+      </div>
+
+      {/* 콘텐츠 레이어 */}
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
-          key={currentSection}
+          key={`content-${currentSection}`}
           custom={direction}
-          variants={slideVariants}
+          variants={contentVariants}
           initial="enter"
           animate="center"
           exit="exit"
           transition={{ 
             type: "tween", 
             duration: ANIMATION_DURATION / 1000, 
-            ease: [0.4, 0, 0.2, 1] 
+            ease: [0.25, 0.46, 0.45, 0.94]
           }}
-          className={`h-full w-full absolute inset-0 bg-gradient-to-br ${sections[currentSection]?.bgGradient || 'from-gray-100 to-gray-200'} z-[1] ${currentSection === 1 ? 'overflow-visible' : 'overflow-hidden'}`}
+          className="h-full w-full absolute inset-0 z-[1]"
         >
           <motion.div
             animate={{
@@ -210,10 +256,10 @@ export default function Home() {
             transition={{
               type: "tween",
               duration: ANIMATION_DURATION / 1000,
-              ease: [0.4, 0, 0.2, 1]
+              ease: [0.25, 0.46, 0.45, 0.94]
             }}
             className="h-full w-full"
-                      >
+          >
             {currentSection === 0 && (
               <HeroSection 
                 title={sections[0].title}
@@ -263,7 +309,7 @@ export default function Home() {
             transition={{ 
               type: "tween", 
               duration: ANIMATION_DURATION / 1000, 
-              ease: [0.4, 0, 0.2, 1] 
+              ease: [0.25, 0.46, 0.45, 0.94]
             }}
             className="fixed bottom-0 left-0 right-0 z-50"
           >

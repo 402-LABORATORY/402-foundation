@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface NewsSectionProps {
@@ -19,6 +19,7 @@ export default function NewsSection({ title }: NewsSectionProps) {
   const router = useRouter();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const newsItems: NewsItem[] = [
@@ -58,24 +59,61 @@ export default function NewsSection({ title }: NewsSectionProps) {
         {/* 왼쪽 섹션 */}
         <motion.div 
           className="w-[400px] flex flex-col justify-center"
-          initial={{ opacity: 0, x: -50 }}
+          initial={{ opacity: 0, x: -80 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          transition={{ 
+            duration: 0.8, 
+            ease: [0.25, 0.46, 0.45, 0.94],
+            delay: 0.2
+          }}
         >
           <div>
-            <h2 className="text-5xl font-bold mb-8 text-gray-800">{title}</h2>
-            <button 
-              onClick={() => router.push('/news')}
-              className="group relative inline-flex items-center justify-center px-6 h-[52px] font-medium tracking-wide text-blue-500 transition duration-300 ease-in-out border-2 border-blue-500 rounded-full overflow-hidden"
+            <motion.h2 
+              className="text-5xl font-bold mb-8 text-gray-800"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ 
+                duration: 0.8, 
+                delay: 0.3,
+                ease: [0.25, 0.46, 0.45, 0.94]
+              }}
             >
-              <span className="absolute inset-0 bg-blue-500 transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span>
+              {title}
+            </motion.h2>
+            <motion.button 
+              onClick={() => router.push('/news')}
+              className="group relative inline-flex items-center justify-center px-6 h-[52px] font-medium tracking-wide text-blue-500 transition duration-500 ease-in-out border-2 border-blue-500 rounded-full overflow-hidden"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ 
+                duration: 0.8, 
+                delay: 0.4,
+                ease: [0.25, 0.46, 0.45, 0.94]
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <motion.span 
+                className="absolute inset-0 bg-blue-500"
+                initial={{ scaleX: 0 }}
+                whileHover={{ scaleX: 1 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+                style={{ originX: 0 }}
+              />
               <span className="relative group-hover:text-white flex items-center gap-2">
                 소식활동 바로가기 
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <motion.svg 
+                  className="w-4 h-4"
+                  animate={{ x: [0, 3, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                </motion.svg>
               </span>
-            </button>
+            </motion.button>
           </div>
         </motion.div>
 
@@ -85,7 +123,10 @@ export default function NewsSection({ title }: NewsSectionProps) {
           ref={containerRef}
           onMouseMove={handleMouseMove}
           onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
+          onMouseLeave={() => {
+            setIsHovering(false);
+            setHoveredItem(null);
+          }}
         >
           {isHovering && (
             <motion.div
@@ -94,7 +135,7 @@ export default function NewsSection({ title }: NewsSectionProps) {
                 width: '100px',
                 height: '100px',
                 borderRadius: '50%',
-                backgroundColor: 'rgba(128, 128, 128, 0.8)',
+                backgroundColor: hoveredItem !== null ? 'rgba(59, 130, 246, 0.8)' : 'rgba(128, 128, 128, 0.8)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -105,36 +146,59 @@ export default function NewsSection({ title }: NewsSectionProps) {
                 top: mousePosition.y
               }}
               animate={{
-                scale: 1
+                scale: hoveredItem !== null ? [1, 1.1, 1] : 1,
               }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.8, repeat: hoveredItem !== null ? Infinity : 0 }}
             >
-              view
+              {hoveredItem !== null ? 'read' : 'view'}
             </motion.div>
           )}
           
           {newsItems.map((item, index) => (
             <motion.div
               key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.5 }}
-              className="bg-main-200 p-6 rounded-lg hover:shadow-lg transition-shadow duration-300"
+              initial={{ opacity: 0, y: 40, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ 
+                delay: index * 0.15, 
+                duration: 0.8,
+                ease: [0.25, 0.46, 0.45, 0.94]
+              }}
+              onMouseEnter={() => setHoveredItem(item.id)}
+              onMouseLeave={() => setHoveredItem(null)}
+              whileHover={{ 
+                scale: 1.02,
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+              }}
+              className="bg-main-200 p-6 rounded-lg transition-all duration-300"
             >
               <div className="flex items-start gap-4">
-                <span className={`inline-block px-3 py-1 text-xs font-semibold text-white rounded-full ${item.categoryColor}`}>
+                <motion.span 
+                  className={`inline-block px-3 py-1 text-xs font-semibold text-white rounded-full ${item.categoryColor}`}
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ duration: 0.2 }}
+                >
                   {item.category}
-                </span>
+                </motion.span>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2 leading-tight">
+                  <motion.h3 
+                    className="text-xl font-semibold text-gray-800 mb-2 leading-tight"
+                    animate={{ opacity: hoveredItem === item.id ? 1 : 0.9 }}
+                  >
                     {item.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                  </motion.h3>
+                  <motion.p 
+                    className="text-sm text-gray-600 mb-3 line-clamp-3"
+                    animate={{ opacity: hoveredItem === item.id ? 0.9 : 0.7 }}
+                  >
                     {item.description}
-                  </p>
-                  <div className="text-xs text-gray-400">
+                  </motion.p>
+                  <motion.div 
+                    className="text-xs text-gray-400"
+                    animate={{ opacity: hoveredItem === item.id ? 0.8 : 0.6 }}
+                  >
                     {item.date}
-                  </div>
+                  </motion.div>
                 </div>
               </div>
             </motion.div>
@@ -142,33 +206,83 @@ export default function NewsSection({ title }: NewsSectionProps) {
           
           {/* 하단 배너 */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="bg-gradient-to-r from-blue-400 to-blue-600 rounded-xl p-8 text-white relative overflow-hidden hover:shadow-lg transition-shadow duration-300"
+            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ 
+              delay: 0.5, 
+              duration: 0.8,
+              ease: [0.25, 0.46, 0.45, 0.94]
+            }}
+            whileHover={{ 
+              scale: 1.02,
+              boxShadow: '0 20px 25px -5px rgba(59, 130, 246, 0.3), 0 10px 10px -5px rgba(59, 130, 246, 0.2)'
+            }}
+            className="bg-gradient-to-r from-blue-400 to-blue-600 rounded-xl p-8 text-white relative overflow-hidden transition-all duration-300"
           >
             <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <motion.div 
+                className="flex items-center gap-2 mb-4"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.7, duration: 0.6 }}
+              >
+                <motion.div 
+                  className="w-8 h-8 bg-white rounded-full flex items-center justify-center"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                >
                   <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                </div>
+                </motion.div>
                 <span className="text-sm font-medium">402공익재단</span>
-              </div>
-              <h3 className="text-2xl font-bold mb-2">
+              </motion.div>
+              <motion.h3 
+                className="text-2xl font-bold mb-2"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8, duration: 0.6 }}
+              >
                 자산형성 지원사업<br />
                 신청 홈페이지 바로가기
-              </h3>
+              </motion.h3>
             </div>
             
             {/* 장식 요소들 */}
-            <div className="absolute top-4 right-8 w-16 h-16 bg-yellow-400 rounded-full opacity-20"></div>
-            <div className="absolute bottom-4 right-16 w-8 h-8 bg-white rounded-full opacity-30"></div>
-            <div className="absolute top-1/2 right-4 w-12 h-12 bg-yellow-300 rounded-full opacity-40"></div>
+            <motion.div 
+              className="absolute top-4 right-8 w-16 h-16 bg-yellow-400 rounded-full opacity-20"
+              animate={{ 
+                scale: [1, 1.2, 1],
+                opacity: [0.2, 0.3, 0.2]
+              }}
+              transition={{ duration: 3, repeat: Infinity }}
+            />
+            <motion.div 
+              className="absolute bottom-4 right-16 w-8 h-8 bg-white rounded-full opacity-30"
+              animate={{ 
+                y: [0, -10, 0],
+                opacity: [0.3, 0.5, 0.3]
+              }}
+              transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+            />
+            <motion.div 
+              className="absolute top-1/2 right-4 w-12 h-12 bg-yellow-300 rounded-full opacity-40"
+              animate={{ 
+                x: [0, 10, 0],
+                y: [0, -5, 0]
+              }}
+              transition={{ duration: 2.5, repeat: Infinity, delay: 1 }}
+            />
             
             {/* 사람 아이콘 (간단한 원형으로 표현) */}
-            <div className="absolute bottom-4 right-8 w-16 h-16 bg-white rounded-full opacity-80 flex items-center justify-center">
+            <motion.div 
+              className="absolute bottom-4 right-8 w-16 h-16 bg-white rounded-full opacity-80 flex items-center justify-center"
+              whileHover={{ scale: 1.1 }}
+              animate={{ 
+                y: [0, -5, 0]
+              }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
               <div className="w-8 h-8 bg-blue-500 rounded-full"></div>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>
