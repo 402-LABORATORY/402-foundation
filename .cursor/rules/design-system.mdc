@@ -1,0 +1,92 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Design System Guidelines
+
+## 폰트 사용 가이드
+
+### 기본 폰트
+- **Primary Font**: PretendardJP (프로젝트 전용 폰트)
+- **위치**: [globals.css](mdc:src/app/globals.css)에서 정의됨
+- **사용법**: 모든 컴포넌트와 페이지에서 기본적으로 PretendardJP 폰트가 적용됨
+
+### 폰트 가중치
+- **100**: Thin
+- **200**: ExtraLight  
+- **300**: Light
+- **400**: Regular (기본)
+- **500**: Medium
+- **600**: SemiBold
+- **700**: Bold
+- **800**: ExtraBold
+- **900**: Black
+
+## 컬러 팔레트
+
+### 메인 컬러 (Main Blue Palette)
+```css
+--main-50: #ecfbff    /* 가장 밝은 블루 */
+--main-100: #d5f4ff   /* 매우 밝은 블루 */
+--main-200: #b4eeff   /* 밝은 블루 */
+--main-300: #80e6ff   /* 연한 블루 */
+--main-400: #44d4ff   /* 미디엄 블루 */
+--main-500: #19b7ff   /* 기본 블루 (Primary) */
+--main-600: #0299ff   /* 진한 블루 */
+--main-700: #0080fa   /* 더 진한 블루 */
+--main-800: #0466c8   /* 매우 진한 블루 */
+--main-900: #0b589d   /* 어두운 블루 */
+--main-950: #0c355f   /* 가장 어두운 블루 */
+```
+
+### Tailwind CSS 클래스 사용법
+```html
+<!-- 텍스트 색상 -->
+<h1 class="text-main-500">메인 제목</h1>
+<p class="text-main-700">본문 텍스트</p>
+
+<!-- 배경 색상 -->
+<div class="bg-main-100">밝은 배경</div>
+<button class="bg-main-500 hover:bg-main-600">버튼</button>
+
+<!-- 보더 색상 -->
+<div class="border border-main-300">테두리</div>
+```
+
+## 개발 가이드라인
+
+### 컴포넌트 생성 시 필수 사항
+1. **폰트**: 별도 설정 없이 기본 PretendardJP 폰트 사용
+2. **색상**: 반드시 메인 컬러 팔레트(`main-*`) 사용
+3. **일관성**: 모든 UI 요소는 정의된 디자인 시스템을 따라야 함
+
+### 컬러 사용 권장사항
+- **Primary Actions**: `main-500` (기본), `main-600` (hover)
+- **Secondary Actions**: `main-100` (배경), `main-700` (텍스트)
+- **Backgrounds**: `main-50` (가장 밝음), `main-100` (밝음)
+- **Text**: `main-700`, `main-800`, `main-900`
+- **Borders**: `main-200`, `main-300`
+
+### 예제 컴포넌트
+```tsx
+export default function Button({ children, variant = 'primary' }) {
+  const baseClasses = "font-medium px-4 py-2 rounded-lg transition-colors";
+  const variants = {
+    primary: "bg-main-500 text-white hover:bg-main-600",
+    secondary: "bg-main-100 text-main-700 hover:bg-main-200",
+    outline: "border border-main-300 text-main-700 hover:bg-main-50"
+  };
+  
+  return (
+    <button className={`${baseClasses} ${variants[variant]}`}>
+      {children}
+    </button>
+  );
+}
+```
+
+## 참조 파일
+- 폰트 정의: [globals.css](mdc:src/app/globals.css)
+- 폰트 파일들: [public/fonts/](mdc:public/fonts/)
+- 메인 페이지 예제: [page.tsx](mdc:src/app/page.tsx)
