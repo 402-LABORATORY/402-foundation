@@ -34,7 +34,7 @@ export default function Activities() {
     isVideo: item.isVideo || false
   }));
 
-  const handleActivityClick = (activity: any) => {
+  const handleActivityClick = (activity: { originalId: string }) => {
     router.push(`/content/${activity.originalId}`);
   };
 
@@ -46,7 +46,7 @@ export default function Activities() {
                            activity.description.toLowerCase().includes(searchTerm.toLowerCase());
       return matchesTab && matchesSearch;
     });
-  }, [activeTab, searchTerm]);
+  }, [activeTab, searchTerm, activities]);
 
   // 페이지네이션 계산
   const totalPages = Math.ceil(filteredActivities.length / itemsPerPage);

@@ -93,7 +93,7 @@ export default function Mission() {
               transition={{ duration: 0.6, delay: 1.0 }}
               className="text-5xl text-blue-500 absolute -top-2 -left-6"
             >
-              "
+              &ldquo;
             </motion.div>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
@@ -111,7 +111,7 @@ export default function Mission() {
               transition={{ duration: 0.6, delay: 1.4 }}
               className="text-5xl text-blue-500 absolute -top-2 -right-6"
             >
-              "
+              &rdquo;
             </motion.div>
           </div>
         </motion.div>

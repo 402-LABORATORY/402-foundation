@@ -58,13 +58,13 @@ export default function Overview() {
             402공익재단 CI 로고는
           </p>
           <p className="text-lg text-gray-700 leading-relaxed">
-            '라이'이 서로 이어지는 모습과 '색상'이 서로 합쳐지는 모습으로
+            &apos;라이&apos;이 서로 이어지는 모습과 &apos;색상&apos;이 서로 합쳐지는 모습으로
           </p>
           <p className="text-lg text-gray-700 leading-relaxed">
-            <span className="font-semibold">"금융산업 노사의 상생"</span>을 상징하였고,
+            <span className="font-semibold">&ldquo;금융산업 노사의 상생&rdquo;</span>을 상징하였고,
           </p>
           <p className="text-lg text-gray-700 leading-relaxed">
-            <span className="font-semibold">"402공익재단을 통해 행복한 대한민국"</span>을 표현하였습니다.
+            <span className="font-semibold">&ldquo;402공익재단을 통해 행복한 대한민국&rdquo;</span>을 표현하였습니다.
           </p>
         </div>
 

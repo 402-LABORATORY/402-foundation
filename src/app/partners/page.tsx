@@ -1,9 +1,52 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-export default function Partners() {
+// 출연 기관 데이터
+const sponsorOrganizations = [
+  { id: 1, name: '전국금융산업노동조합', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 2, name: '금융산업사용자협의회', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 3, name: '신한은행', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 4, name: '우리은행', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 5, name: 'SC제일은행', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 6, name: '하나은행', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 7, name: 'KB국민은행', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 8, name: 'KDB산업은행', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 9, name: 'IBK기업은행', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 10, name: '한국수출입은행', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 11, name: '씨티은행', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 12, name: 'iM뱅크', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 13, name: 'BNK부산은행', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 14, name: 'BNK경남은행', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 15, name: '광주은행', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 16, name: '전북은행', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 17, name: '제주은행', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 18, name: 'NH농협은행', logo: '/images/hero/hero-bg-1.jpg' }
+];
+
+// 협력 기관 데이터
+const partnerOrganizations = [
+  { id: 1, name: '한국은행', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 2, name: '금융감독원', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 3, name: '예금보험공사', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 4, name: '신용보증기금', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 5, name: '기술보증기금', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 6, name: '한국주택금융공사', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 7, name: '한국자산관리공사', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 8, name: '한국투자공사', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 9, name: '중소벤처기업부', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 10, name: '고용노동부', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 11, name: '보건복지부', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 12, name: '교육부', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 13, name: '서울시청', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 14, name: '부산시청', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 15, name: '대구시청', logo: '/images/hero/hero-bg-1.jpg' },
+  { id: 16, name: '인천시청', logo: '/images/hero/hero-bg-1.jpg' }
+];
+
+// useSearchParams를 사용하는 컴포넌트를 분리
+function PartnersContent() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState('sponsor');
 
@@ -19,48 +62,6 @@ export default function Partners() {
     { name: '출연 기관', id: 'sponsor' },
     { name: '협력 기관', id: 'partner' },
     { name: '후원 안내', id: 'donation' }
-  ];
-
-  // 출연 기관 데이터
-  const sponsorOrganizations = [
-    { id: 1, name: '전국금융산업노동조합', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 2, name: '금융산업사용자협의회', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 3, name: '신한은행', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 4, name: '우리은행', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 5, name: 'SC제일은행', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 6, name: '하나은행', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 7, name: 'KB국민은행', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 8, name: 'KDB산업은행', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 9, name: 'IBK기업은행', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 10, name: '한국수출입은행', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 11, name: '씨티은행', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 12, name: 'iM뱅크', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 13, name: 'BNK부산은행', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 14, name: 'BNK경남은행', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 15, name: '광주은행', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 16, name: '전북은행', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 17, name: '제주은행', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 18, name: 'NH농협은행', logo: '/images/hero/hero-bg-1.jpg' }
-  ];
-
-  // 협력 기관 데이터
-  const partnerOrganizations = [
-    { id: 1, name: '한국은행', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 2, name: '금융감독원', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 3, name: '예금보험공사', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 4, name: '신용보증기금', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 5, name: '기술보증기금', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 6, name: '한국주택금융공사', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 7, name: '한국자산관리공사', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 8, name: '한국투자공사', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 9, name: '중소벤처기업부', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 10, name: '고용노동부', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 11, name: '보건복지부', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 12, name: '교육부', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 13, name: '서울시청', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 14, name: '부산시청', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 15, name: '대구시청', logo: '/images/hero/hero-bg-1.jpg' },
-    { id: 16, name: '인천시청', logo: '/images/hero/hero-bg-1.jpg' }
   ];
 
   const renderContent = () => {
@@ -116,17 +117,7 @@ export default function Partners() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-20">
-        <div className="container mx-auto px-6">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">참여 기관</h1>
-          <p className="text-xl text-white/90">
-            402공익재단과 함께하는 출연기관과 협력기관을 소개합니다.
-          </p>
-        </div>
-      </section>
-
+    <>
       {/* Sub Navigation */}
       <div className="bg-white border-b border-gray-200 sticky top-16 z-40">
         <div className="container mx-auto px-6">
@@ -143,9 +134,9 @@ export default function Partners() {
                 >
                   {item.name}
                 </button>
-                                 {index < subNavItems.length - 1 && (
-                   <span className="mx-6 text-gray-400">|</span>
-                 )}
+                {index < subNavItems.length - 1 && (
+                  <span className="mx-6 text-gray-400">|</span>
+                )}
               </React.Fragment>
             ))}
           </nav>
@@ -172,6 +163,38 @@ export default function Partners() {
         {/* Organizations Grid */}
         {renderContent()}
       </div>
+    </>
+  );
+}
+
+export default function Partners() {
+  return (
+    <div className="min-h-screen bg-gray-50 pt-20">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-20">
+        <div className="container mx-auto px-6">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">참여 기관</h1>
+          <p className="text-xl text-white/90">
+            402공익재단과 함께하는 출연기관과 협력기관을 소개합니다.
+          </p>
+        </div>
+      </section>
+
+      {/* Suspense로 감싸서 useSearchParams 에러 해결 */}
+      <Suspense fallback={
+        <div className="container mx-auto px-6 py-16">
+          <div className="animate-pulse">
+            <div className="h-12 bg-gray-200 rounded mb-4"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="bg-gray-200 h-48 rounded-xl"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      }>
+        <PartnersContent />
+      </Suspense>
     </div>
   );
 } 

@@ -30,7 +30,7 @@ export default function Greeting() {
               transition={{ duration: 0.6, delay: 0.6 }}
               className="text-5xl text-blue-400 opacity-30 absolute -top-2 -left-2 font-serif leading-none"
             >
-              "
+              &ldquo;
             </motion.div>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
@@ -48,7 +48,7 @@ export default function Greeting() {
               transition={{ duration: 0.6, delay: 0.8 }}
               className="text-5xl text-blue-400 opacity-30 absolute -bottom-6 -right-2 font-serif leading-none"
             >
-              "
+              &rdquo;
             </motion.div>
           </div>
         </motion.div>

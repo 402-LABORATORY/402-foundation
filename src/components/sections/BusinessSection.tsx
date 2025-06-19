@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence, PanInfo, useMotionValue, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, PanInfo, useMotionValue } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
 interface Card {
@@ -16,7 +16,6 @@ interface BusinessSectionProps {
 
 const CARD_WIDTH = 320;
 const CARD_GAP = 24;
-const VISIBLE_CARDS = 3; // 한 번에 보여질 카드 수
 
 export default function BusinessSection({ title, subtitle, cards }: BusinessSectionProps) {
   const router = useRouter();
@@ -46,7 +45,7 @@ export default function BusinessSection({ title, subtitle, cards }: BusinessSect
     setIsDragging(true);
   };
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     setIsDragging(false);
     const newX = x + info.offset.x;
     
@@ -60,7 +59,7 @@ export default function BusinessSection({ title, subtitle, cards }: BusinessSect
     }
   };
 
-  const handleDrag = (event: any, info: PanInfo) => {
+  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (!isDragging) return;
     
     const newX = x + info.offset.x;

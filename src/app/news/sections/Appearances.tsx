@@ -16,6 +16,7 @@ export default function Appearances() {
   // 기존 포맷에 맞게 변환
   const appearances = allAppearances.map((item, index) => ({
     id: index + 1,
+    originalId: item.id, // 원본 ID 저장
     category: item.title,
     content: item.description,
     amount: item.amount || '미정',
@@ -23,12 +24,9 @@ export default function Appearances() {
     year: new Date(item.date).getFullYear()
   }));
 
-  const handleAppearanceClick = (appearanceId: string) => {
+  const handleAppearanceClick = (appearance: { originalId: string }) => {
     // 원본 데이터의 ID를 사용하여 라우팅
-    const originalItem = allAppearances[appearanceId - 1];
-    if (originalItem) {
-      router.push(`/content/${originalItem.id}`);
-    }
+    router.push(`/content/${appearance.originalId}`);
   };
 
   // 필터링된 데이터 계산
@@ -41,7 +39,7 @@ export default function Appearances() {
         appearance.note.toLowerCase().includes(searchTerm.toLowerCase());
       return matchesSearch;
     });
-  }, [searchTerm]);
+  }, [searchTerm, appearances]);
 
   // 페이지네이션 계산
   const totalPages = Math.ceil(filteredAppearances.length / itemsPerPage);
@@ -138,7 +136,7 @@ export default function Appearances() {
                 {currentAppearances.map((appearance, index) => (
                   <tr 
                     key={appearance.id}
-                    onClick={() => handleAppearanceClick(appearance.id)}
+                    onClick={() => handleAppearanceClick(appearance)}
                     className={`cursor-pointer hover:bg-blue-50 transition-colors duration-200 ${
                       index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
                     }`}

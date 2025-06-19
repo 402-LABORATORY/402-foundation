@@ -4,16 +4,33 @@ import { useParams, useRouter } from 'next/navigation';
 import { getContentById } from '../../../utils/contentData';
 import { useState, useEffect } from 'react';
 
+interface ContentItem {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  category: string;
+  subcategory: string;
+  content: string;
+  image?: string;
+  author?: string;
+  hasAttachment?: boolean;
+}
+
 export default function ContentDetail() {
   const params = useParams();
   const router = useRouter();
-  const [content, setContent] = useState<any>(null);
+  const [content, setContent] = useState<ContentItem | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (params.id) {
       const contentData = getContentById(params.id as string);
-      setContent(contentData);
+      if (contentData) {
+        setContent(contentData as ContentItem);
+      } else {
+        setContent(null);
+      }
       setLoading(false);
     }
   }, [params.id]);
@@ -44,20 +61,6 @@ export default function ContentDetail() {
       </div>
     );
   }
-
-  // 카테고리별 색상 설정
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'business':
-        return 'from-green-500 to-blue-600';
-      case 'news':
-        return 'from-purple-500 to-pink-600';
-      case 'resources':
-        return 'from-blue-600 to-indigo-700';
-      default:
-        return 'from-gray-500 to-gray-600';
-    }
-  };
 
   const getCategoryName = (category: string) => {
     switch (category) {

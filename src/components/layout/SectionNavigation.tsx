@@ -5,7 +5,14 @@ import { motion } from 'framer-motion';
 interface Section {
   id: string;
   title: string;
-  [key: string]: any;
+  subtitle?: string;
+  description?: string;
+  cards?: Array<{
+    title: string;
+    bgColor: string;
+    image?: string;
+  }>;
+  bgGradient: string;
 }
 
 interface SectionNavigationProps {

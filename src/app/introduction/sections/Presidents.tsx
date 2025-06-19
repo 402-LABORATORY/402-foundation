@@ -60,7 +60,7 @@ export default function Presidents() {
     setIsDragging(true);
   };
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     setIsDragging(false);
     const newX = x + info.offset.x;
     
@@ -73,7 +73,7 @@ export default function Presidents() {
     }
   };
 
-  const handleDrag = (event: any, info: PanInfo) => {
+  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (!isDragging) return;
     
     const newX = x + info.offset.x;

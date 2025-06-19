@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Header from '@/components/layout/Header';
 import SectionNavigation from '@/components/layout/SectionNavigation';
@@ -135,7 +135,7 @@ export default function Home() {
   };
 
   // 통합된 페이지 전환 함수 - 스크롤 쿨다운 추가
-  const paginate = (newDirection: number) => {
+  const paginate = useCallback((newDirection: number) => {
     const now = Date.now();
     if (isScrolling || (now - lastScrollTime.current) < SCROLL_COOLDOWN) return;
     
@@ -169,7 +169,7 @@ export default function Home() {
     }
     
     setTimeout(() => setIsScrolling(false), ANIMATION_DURATION);
-  };
+  }, [currentSection, isScrolling, showFooter, ANIMATION_DURATION, SCROLL_COOLDOWN]);
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
@@ -197,7 +197,7 @@ export default function Home() {
       window.removeEventListener('wheel', handleWheel);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [currentSection, isScrolling, showFooter]);
+  }, [currentSection, isScrolling, showFooter, paginate]);
 
   const goToSection = (index: number) => {
     if (isScrolling || index === currentSection) return;

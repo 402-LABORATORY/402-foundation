@@ -30,7 +30,7 @@ export default function Media() {
     hasFile: item.hasFile || false
   }));
 
-  const handleMediaClick = (media: any) => {
+  const handleMediaClick = (media: { originalId: string }) => {
     router.push(`/content/${media.originalId}`);
   };
 
@@ -42,7 +42,7 @@ export default function Media() {
                            item.author.toLowerCase().includes(searchTerm.toLowerCase());
       return matchesTab && matchesSearch;
     });
-  }, [activeTab, searchTerm]);
+  }, [activeTab, searchTerm, mediaData]);
 
   // 페이지네이션 계산
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);

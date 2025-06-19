@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Notices from './sections/Notices';
 import Media from './sections/Media';
 import Activities from './sections/Activities';
 import Appearances from './sections/Appearances';
 
-export default function NewsPage() {
+// useSearchParams를 사용하는 컴포넌트를 분리
+function NewsContent() {
   const [activeTab, setActiveTab] = useState('notices');
   const searchParams = useSearchParams();
 
@@ -42,18 +43,7 @@ export default function NewsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-purple-500 to-pink-600 text-white py-20">
-        <div className="container mx-auto px-6">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">소식 활동</h1>
-          <p className="text-xl text-white/90">
-            402공익재단의 최신 소식과 다양한 활동을 확인하고
-            언론보도 및 출연현황을 통해 재단의 발자취를 살펴보세요.
-          </p>
-        </div>
-      </section>
-
+    <>
       {/* Sub Navigation */}
       <div className="bg-white border-b border-gray-200 sticky top-16 z-40">
         <div className="container mx-auto px-6">
@@ -83,6 +73,35 @@ export default function NewsPage() {
       <div className="container mx-auto px-6 py-16">
         {renderContent()}
       </div>
+    </>
+  );
+}
+
+export default function NewsPage() {
+  return (
+    <div className="min-h-screen bg-gray-50 pt-20">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-purple-500 to-pink-600 text-white py-20">
+        <div className="container mx-auto px-6">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">소식 활동</h1>
+          <p className="text-xl text-white/90">
+            402공익재단의 최신 소식과 다양한 활동을 확인하고
+            언론보도 및 출연현황을 통해 재단의 발자취를 살펴보세요.
+          </p>
+        </div>
+      </section>
+
+      {/* Suspense로 감싸서 useSearchParams 에러 해결 */}
+      <Suspense fallback={
+        <div className="container mx-auto px-6 py-16">
+          <div className="animate-pulse">
+            <div className="h-12 bg-gray-200 rounded mb-4"></div>
+            <div className="h-64 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      }>
+        <NewsContent />
+      </Suspense>
     </div>
   );
 } 

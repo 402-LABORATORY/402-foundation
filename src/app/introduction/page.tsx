@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Greeting from './sections/Greeting';
 import Presidents from './sections/Presidents';
@@ -11,7 +11,8 @@ import Officers from './sections/Officers';
 import Organization from './sections/Organization';
 import Location from './sections/Location';
 
-export default function Introduction() {
+// useSearchParams를 사용하는 컴포넌트를 분리
+function IntroductionContent() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState('greeting');
 
@@ -58,18 +59,7 @@ export default function Introduction() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-main-500 to-main-600 text-white py-20">
-        <div className="container mx-auto px-6">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">재단 소개</h1>
-          <p className="text-xl text-white/90">
-            402공익재단은 공익사업을 통해 사회적 가치를 창출하고 
-            지속가능한 발전을 위해 노력하는 공익재단입니다.
-          </p>
-        </div>
-      </section>
-
+    <>
       {/* Sub Navigation */}
       <div className="bg-white border-b border-gray-200 sticky top-16 z-40">
         <div className="container mx-auto px-6">
@@ -99,6 +89,35 @@ export default function Introduction() {
       <div className="container mx-auto px-6 py-16">
         {renderContent()}
       </div>
+    </>
+  );
+}
+
+export default function Introduction() {
+  return (
+    <div className="min-h-screen bg-gray-50 pt-20">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-main-500 to-main-600 text-white py-20">
+        <div className="container mx-auto px-6">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">재단 소개</h1>
+          <p className="text-xl text-white/90">
+            402공익재단은 공익사업을 통해 사회적 가치를 창출하고 
+            지속가능한 발전을 위해 노력하는 공익재단입니다.
+          </p>
+        </div>
+      </section>
+
+      {/* Suspense로 감싸서 useSearchParams 에러 해결 */}
+      <Suspense fallback={
+        <div className="container mx-auto px-6 py-16">
+          <div className="animate-pulse">
+            <div className="h-12 bg-gray-200 rounded mb-4"></div>
+            <div className="h-64 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      }>
+        <IntroductionContent />
+      </Suspense>
     </div>
   );
 } 

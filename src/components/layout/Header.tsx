@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -74,7 +75,7 @@ export default function Header() {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <a href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+          <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <div className="w-10 h-10 bg-gradient-to-br from-main-400 to-main-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">4</span>
             </div>
@@ -82,7 +83,7 @@ export default function Header() {
             <span className="text-sm text-gray-500 hidden sm:block">
               402 Foundation
             </span>
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav
@@ -91,7 +92,7 @@ export default function Header() {
             onMouseLeave={() => setIsMegaMenuOpen(false)}
           >
             <div className="flex items-center max-w-4xl w-full">
-              {menuItems.map((item, index) => (
+              {menuItems.map((item) => (
                 <div key={item.name} className="relative flex-1 text-center px-4">
                   <a
                     href={item.href}
@@ -128,7 +129,7 @@ export default function Header() {
             animate={{ opacity: 1, y: 0 }}
             className="lg:hidden mt-4 pb-4 border-t border-gray-200 pt-4"
           >
-            {menuItems.map((item, index) => (
+            {menuItems.map((item) => (
               <a
                 key={item.name}
                 href={item.href}
@@ -165,12 +166,12 @@ export default function Header() {
             {/* 오른쪽 메뉴 - 상단 네비게이션과 정확히 일치 */}
             <div className="flex-1 -ml-2">
               <div className="flex justify-between items-start max-w-4xl mx-auto">
-                {menuItems.map((item, index) => (
+                {menuItems.map((item) => (
                   <div key={item.name} className="flex-1 px-4">
 
                     {/* 서브 메뉴 항목들 */}
                     <div className="space-y-1">
-                      {item.subItems?.map((subItem, subIndex) => (
+                      {item.subItems?.map((subItem) => (
                         <a
                           key={subItem.name}
                           href={subItem.href}
